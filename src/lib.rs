@@ -1,5 +1,8 @@
 use pyo3::prelude::*;
-use bgpkit_parser::{BgpkitParser, BgpElem, ElemType, Asn, NetworkPrefix, MetaCommunity, BgpIdentifier, AttrRaw, Community, LargeCommunity, ExtendedCommunity};
+use pyo3::pyproto::*;
+use pyo3::PyIterProtocol;
+use bgpkit_parser::{BgpkitParser, BgpElem};
+use bgpkit_parser::models::{ElemType, Asn, NetworkPrefix, MetaCommunity, BgpIdentifier, AttrRaw, Community, LargeCommunity, ExtendedCommunity};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 #[pyclass]
@@ -16,7 +19,7 @@ struct PyBgpElem {
     local_pref: Option<u32>,
     med: Option<u32>,
     communities: Option<Vec<String>>, // MetaCommunity enum converted to Vec<String>
-    atomic: bool,
+    atomic: Option<bool>,
     aggr_asn: Option<u64>, // Asn is u64
     aggr_ip: Option<String>, // BgpIdentifier converted to String
     only_to_customer: Option<u64>, // Asn is u64
@@ -40,7 +43,7 @@ impl PyBgpElem {
         local_pref: Option<u32>,
         med: Option<u32>,
         communities: Option<Vec<String>>,
-        atomic: bool,
+        atomic: Option<bool>,
         aggr_asn: Option<u64>,
         aggr_ip: Option<String>,
         only_to_customer: Option<u64>,
@@ -53,19 +56,19 @@ impl PyBgpElem {
             peer_ip,
             peer_asn,
             prefix,
-            next_hop,
-            as_path,
-            origin_asns,
-            origin,
-            local_pref,
-            med,
-            communities,
-            atomic,
-            aggr_asn,
-            aggr_ip,
-            only_to_customer,
-            unknown,
-            deprecated,
+            next_hop: None,
+            as_path: None,
+            origin_asns: None,
+            origin: None,
+            local_pref: None,
+            med: None,
+            communities: None,
+            atomic: None,
+            aggr_asn: None,
+            aggr_ip: None,
+            only_to_customer: None,
+            unknown: None,
+            deprecated: None,
         }
     }
 }
