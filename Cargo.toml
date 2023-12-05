@@ -1,0 +1,7 @@
+[lib]
+name = "bgpkit_parser_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+bgpkit-parser = { git = "https://github.com/bgpkit/bgpkit-parser", branch = "main" }
+pyo3 = { version = "0.20", features = ["extension-module"] }
