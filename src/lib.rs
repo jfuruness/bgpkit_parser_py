@@ -1,9 +1,12 @@
 use pyo3::prelude::*;
-use pyo3::pyproto::*;
 use pyo3::PyIterProtocol;
-use bgpkit_parser::{BgpkitParser, BgpElem};
-use bgpkit_parser::models::{ElemType, Asn, NetworkPrefix, MetaCommunity, BgpIdentifier, AttrRaw, Community, LargeCommunity, ExtendedCommunity};
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use pyo3::iter::IterNextOutput;
+use bgpkit_parser::{BgpkitParser};
+use std::io::Read; // Import the Read trait
+use std::fs::File;
+//use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+//use bgpkit_parser::models::{ElemType, Asn, NetworkPrefix, MetaCommunity, BgpIdentifier, AttrRaw, Community, LargeCommunity, ExtendedCommunity};
+
 
 #[pyclass]
 struct PyBgpElem {
@@ -73,15 +76,19 @@ impl PyBgpElem {
     }
 }
 
-#[pyfunction]
-fn parse_bgp_data(url: String) -> PyResult<Py<PyBgpElemIterator>> {
-    let parser = BgpkitParser::new(&url).unwrap();
-    let iter = PyBgpElemIterator { parser };
-    Python::with_gil(|py| Ok(Py::new(py, iter)?))
+struct PyBgpElemIterator {
+    parser: BgpkitParser<BufReader<File>>,
 }
 
-struct PyBgpElemIterator {
-    parser: BgpkitParser,
+#[pyfunction]
+fn parse_bgp_data(file_path: String) -> PyResult<Py<PyBgpElemIterator>> {
+    let file = File::open(file_path)
+        .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(format!("Failed to open file: {}", e)))?;
+    let reader = BufReader::new(file);
+    let parser = BgpkitParser::new(reader).map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(format!("Failed to create parser: {}", e)))?;
+
+    let iter = PyBgpElemIterator { parser };
+    Python::with_gil(|py| Ok(Py::new(py, iter)?))
 }
 
 #[pyproto]
